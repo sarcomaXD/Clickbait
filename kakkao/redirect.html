@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>카카오 Redirect 처리</title>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+          integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka"
+          crossorigin="anonymous"></script>
+  <script>
+    Kakao.init('34e1cf8f90ad16972c7c8735c9045185'); // 앱의 JS 키
+
+    async function getTokenAndUserInfo() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+
+      if (!code) {
+        alert("코드가 없습니다.");
+        return;
+      }
+
+      try {
+        const response = await fetch("https://kauth.kakao.com/oauth/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: "34e1cf8f90ad16972c7c8735c9045185",
+            redirect_uri: "http://34.64.154.88/redirect.html",
+            code: code,
+          }),
+        });
+
+        const data = await response.json();
+        console.log("AccessToken 결과:", data);
+
+        if (data.access_token) {
+          Kakao.Auth.setAccessToken(data.access_token);
+
+          // 사용자 정보 가져오기
+          const user = await Kakao.API.request({ url: '/v2/user/me' });
+          const nickname = user.kakao_account.profile.nickname;
+          document.getElementById("result").innerText = `${nickname}님 환영합니다!`;
+
+          // 메시지 전송 버튼 활성화
+          document.getElementById("send-btn").style.visibility = "visible";
+          window.nickname = nickname; // 전역 저장
+        } else {
+          alert("토큰 요청 실패: " + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert("에러 발생: " + err);
+      }
+    }
+
+/*    function sendToMe() {
+      Kakao.API.request({
+        url: '/v2/api/talk/memo/send',
+        data: {
+          template_id: 119111, // 등록한 템플릿 ID
+          template_args: {
+            'title': `${window.nickname}님이 선물을 보냈습니다!`,
+            'desc': '선물함에서 확인해보세요!',
+            'img_url': '87095_112506_1646.jpg',
+            'heigth': '275',
+            'width': '183',
+            'btn_url': 'send.html',
+          }
+        },
+      });
+    }
+*/
+    function sendToMe() {
+      let inputData = document.getElementById("data1").value;
+      Kakao.API.request({
+        url: '/v2/api/talk/memo/send',
+        data: {
+          template_id: 119439, // 등록한 템플릿 ID
+          template_args: {
+            'price': inputData,
+            'btn_url': 'send.html',
+          }
+        },
+      });
+    }
+
+    window.onload = getTokenAndUserInfo;
+  </script>
+</head>
+<body>
+  <h2 id="result">로그인 처리 중...</h2>
+  <!-- <button id="send-btn" style="visibility:hidden;" onclick="sendToMe()">나에게 메시지 보내기</button> -->
+  <input type="text" Id="data1">
+  <button id="send-btn" style="visibility:hidden;" onclick="sendToMe()">나에게 송금 보내기</button>
+</body>
+</html>
