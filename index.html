@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>카카오 로그인</title>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+      integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka"
+      crossorigin="anonymous"></script>
+    <script>
+      Kakao.init('34e1cf8f90ad16972c7c8735c9045185'); // JavaScript 키
+
+      function loginWithKakao() {
+        Kakao.Auth.authorize({
+          redirectUri: 'http://34.64.154.88/kakao_redirect.html', // 리디렉션 페이지
+          state: 'sendme_feed',
+          scope: 'profile_nickname,talk_message',
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <h2>카카오 로그인 테스트</h2>
+    <a href="javascript:loginWithKakao()">
+      <img src="https://k.kakaocdn.net/14/dn/btroDszwNrM/I6efHub1SN5KCJqLm1Ovx1/o.jpg" width="222" />
+    </a>
+  </body>
+</html>
